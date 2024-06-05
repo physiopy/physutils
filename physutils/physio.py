@@ -4,6 +4,7 @@ Helper class for holding physiological data and associated metadata inforamtion
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 from loguru import logger
 
 
@@ -139,6 +140,44 @@ class Physio:
         """Physiological data"""
         return self._suppdata
     
+
+    def plot_physio(self, *, ax=None):
+        """
+        Plots `Physio.data` and associated peaks / troughs
+
+        Parameters
+        ----------
+        data : Physio_like
+            Physiological data to plot
+        ax : :class:`matplotlib.axes.Axes`, optional
+            Axis on which to plot `data`. If None, a new axis is created. Default:
+            None
+
+        Returns
+        -------
+        ax : :class:`matplotlib.axes.Axes`
+            Axis with plotted `Physio.data`
+        """
+        logger.debug(f"Plotting {self}")
+        # generate x-axis time series
+        fs = 1 if np.isnan(self.fs) else self.fs
+        time = np.arange(0, len(self) / fs, 1 / fs)
+        if ax is None:
+            fig, ax = plt.subplots(1, 1)
+        # plot data with peaks + troughs, as appropriate
+        ax.plot(
+            time,
+            self.data,
+            "b",
+            time[self.peaks],
+            self[self.peaks],
+            ".r",
+            time[self.troughs],
+            self[self.troughs],
+            ".g",
+        )
+
+        return ax
 
     def phys2neurokit(
         self, copy_data, copy_peaks, copy_troughs, module, neurokit_path=None
