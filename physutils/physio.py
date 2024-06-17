@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Helper class for holding physiological data and associated metadata inforamtion
+Helper class for holding physiological data and associated metadata information
 """
 
 import inspect
-import sys
 from functools import wraps
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from loguru import logger
+
 
 def make_operation(*, exclude=None):
     """
@@ -134,7 +134,7 @@ def check_physio(data, ensure_fs=True, copy=False):
         If `ensure_fs` is set and `data` doesn't have valid sampling rate
     """
 
-    from peakdet.io import load_physio
+    from physutils.io import load_physio
 
     if not isinstance(data, Physio):
         data = load_physio(data)
@@ -156,7 +156,7 @@ def new_physio_like(
     dtype=None,
     copy_history=True,
     copy_metadata=True,
-    copy_suppdata=True
+    copy_suppdata=True,
 ):
     """
     Makes `data` into physio object like `ref_data`
@@ -206,6 +206,7 @@ def new_physio_like(
         suppdata=suppdata,
     )
     return out
+
 
 class Physio:
     """
@@ -338,7 +339,6 @@ class Physio:
     def suppdata(self):
         """Physiological data"""
         return self._suppdata
-    
 
     def plot_physio(self, *, ax=None):
         """
