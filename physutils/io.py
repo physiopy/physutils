@@ -9,7 +9,7 @@ import os.path as op
 import numpy as np
 from loguru import logger
 
-from peakdet import physio, utils
+from physutils import physio
 
 EXPECTED = ["data", "fs", "history", "metadata"]
 
@@ -60,7 +60,7 @@ def load_physio(data, *, fs=None, dtype=None, history=None, allow_pickle=False):
             if inp["history"] is not None:
                 inp["history"] = list(map(tuple, inp["history"]))
         except (IOError, OSError, ValueError):
-            inp = dict(data=np.loadtxt(data), history=[utils._get_call(exclude=[])])
+            inp = dict(data=np.loadtxt(data), history=[physio._get_call(exclude=[])])
         logger.debug("Instantiating Physio object from a file")
         phys = physio.Physio(**inp)
     # if we got a numpy array, load that into a Physio object
@@ -78,8 +78,8 @@ def load_physio(data, *, fs=None, dtype=None, history=None, allow_pickle=False):
         logger.debug(
             "Instantiating a new Physio object from the provided Physio object"
         )
-        phys = utils.new_physio_like(data, data.data, fs=fs, dtype=dtype)
-        phys._history += [utils._get_call()]
+        phys = physio.new_physio_like(data, data.data, fs=fs, dtype=dtype)
+        phys._history += [physio._get_call()]
     else:
         raise TypeError("Cannot load data of type {}".format(type(data)))
 
@@ -115,7 +115,7 @@ def save_physio(fname, data):
         Full filepath to saved output
     """
 
-    from peakdet.utils import check_physio
+    from physutils.physio import check_physio
 
     data = check_physio(data)
     fname += ".phys" if not fname.endswith(".phys") else ""
@@ -148,7 +148,7 @@ def load_history(file, verbose=False):
 
     # import inside function for safety!
     # we'll likely be replaying some functions from within this module...
-    import peakdet
+    import physutils
 
     # grab history from provided JSON file
     with open(file, "r") as src:
@@ -180,9 +180,9 @@ def load_history(file, verbose=False):
                 raise FileNotFoundError(
                     "{} does not exist. {}".format(kwargs["data"], msg)
                 )
-            data = getattr(peakdet, func)(**kwargs)
+            data = getattr(physutils, func)(**kwargs)
         else:
-            data = getattr(peakdet, func)(data, **kwargs)
+            data = getattr(physutils, func)(data, **kwargs)
 
     return data
 
@@ -206,7 +206,7 @@ def save_history(file, data):
         Full filepath to saved output
     """
 
-    from peakdet.utils import check_physio
+    from physutils.physio import check_physio
 
     data = check_physio(data)
     if len(data.history) == 0:
