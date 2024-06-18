@@ -242,7 +242,16 @@ class Physio:
         Secondary physiological waveform
     """
 
-    def __init__(self, data, fs=None, history=None, metadata=None, suppdata=None):
+    def __init__(
+        self,
+        data,
+        fs=None,
+        history=None,
+        metadata=None,
+        suppdata=None,
+        physio_type=None,
+        label=None,
+    ):
         logger.debug("Initializing new Physio object")
         self._data = np.asarray(data).squeeze()
         if self.data.ndim > 1:
@@ -255,6 +264,8 @@ class Physio:
                 "Provided data of type {} is not numeric.".format(self.data.dtype)
             )
         self._fs = np.float64(fs)
+        self._physio_type = physio_type
+        self._label = label
         self._history = [] if history is None else history
         if not isinstance(self._history, list) or any(
             [not isinstance(f, tuple) for f in self._history]
@@ -339,6 +350,16 @@ class Physio:
     def suppdata(self):
         """Physiological data"""
         return self._suppdata
+
+    @property
+    def label(self):
+        """Physio instance label"""
+        return self._label
+
+    @property
+    def physio_type(self):
+        """Physiological signal type"""
+        return self._physio_type
 
     def plot_physio(self, *, ax=None):
         """
