@@ -3,6 +3,7 @@
 Functions for loading and saving data and analyses
 """
 
+import importlib
 import json
 import os.path as op
 
@@ -148,7 +149,10 @@ def load_history(file, verbose=False):
 
     # import inside function for safety!
     # we'll likely be replaying some functions from within this module...
-    import physutils
+
+    # TODO: These will need to be imported in order to replay history from this module. Unless another way is found
+    # import peakdet
+    # import phys2denoise
 
     # grab history from provided JSON file
     with open(file, "r") as src:
@@ -180,9 +184,17 @@ def load_history(file, verbose=False):
                 raise FileNotFoundError(
                     "{} does not exist. {}".format(kwargs["data"], msg)
                 )
-            data = getattr(physutils, func)(**kwargs)
+            name_parts = func.split(".")
+            func = name_parts[-1]
+            module_name = ".".join(name_parts[:-1])
+            module_object = importlib.import_module(module_name)
+            data = getattr(module_object, func)(**kwargs)
         else:
-            data = getattr(physutils, func)(data, **kwargs)
+            name_parts = func.split(".")
+            func = name_parts[-1]
+            module_name = ".".join(name_parts[:-1])
+            module_object = importlib.import_module(module_name)
+            data = getattr(module_object, func)(data, **kwargs)
 
     return data
 

@@ -25,7 +25,7 @@ def test_load_physio(caplog):
     assert isinstance(csv, physio.Physio)
     assert np.allclose(csv, pckl)
     assert np.isnan(csv.fs)
-    assert csv.history[0][0] == "load_physio"
+    assert csv.history[0][0] == "physutils.io.load_physio"
 
     # try loading array
     arr = io.load_physio(np.loadtxt(get_test_data_path("ECG.csv")))
@@ -41,7 +41,7 @@ def test_load_physio(caplog):
     out = io.load_physio(arr, dtype="float32")
     assert out.data.dtype == np.dtype("float32")
     assert out.history[0][0] == "np.loadtxt"
-    assert out.history[-1][0] == "load_physio"
+    assert out.history[-1][0] == "physutils.io.load_physio"
     with pytest.raises(TypeError):
         io.load_physio([1, 2, 3])
 

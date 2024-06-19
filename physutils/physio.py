@@ -32,8 +32,11 @@ def make_operation(*, exclude=None):
             # exclude 'data', by default
             ignore = ["data"] if exclude is None else exclude
 
+            # set name as the full module function name
+            name = inspect.getmodule(func).__name__ + "." + func.__name__
+            # name = func.__name__
+
             # grab parameters from `func` by binding signature
-            name = func.__name__
             sig = inspect.signature(func)
             params = sig.bind(data, *args, **kwargs).arguments
 
@@ -106,6 +109,8 @@ def _get_call(*, exclude=None, serializable=True):
         for k, v in provided.items():
             if hasattr(v, "tolist"):
                 provided[k] = v.tolist()
+
+    function = inspect.getmodule(frame).__name__ + "." + function
 
     return function, provided
 

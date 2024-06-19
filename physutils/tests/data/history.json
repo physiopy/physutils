@@ -1,6 +1,6 @@
 [
     [
-        "filter_physio",
+        "physutils.tests.utils.filter_physio",
         {
             "cutoffs": [
                 5.0,
