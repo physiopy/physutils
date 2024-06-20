@@ -17,7 +17,7 @@ def test_load_physio(caplog):
     assert pckl.data.size == 44611
     assert pckl.fs == 1000.0
     pckl = io.load_physio(get_test_data_path("ECG.phys"), fs=500.0, allow_pickle=True)
-    # assert caplog.text.count("WARNING") == 1
+    assert caplog.text.count("WARNING") == 1
     assert pckl.fs == 500.0
 
     # try loading CSV file
@@ -29,7 +29,7 @@ def test_load_physio(caplog):
 
     # try loading array
     arr = io.load_physio(np.loadtxt(get_test_data_path("ECG.csv")))
-    # assert caplog.text.count("WARNING") == 2
+    assert caplog.text.count("WARNING") == 2
     assert isinstance(arr, physio.Physio)
     arr = io.load_physio(
         np.loadtxt(get_test_data_path("ECG.csv")),
@@ -81,7 +81,7 @@ def test_save_history(tmpdir, caplog):
     # make physio object and perform some operations
     phys = physio.Physio(np.loadtxt(fname), fs=1000.0)
     io.save_history(temp_history, phys)
-    # assert caplog.text.count("WARNING") == 1  # no history = warning
+    assert caplog.text.count("WARNING") == 1  # no history = warning
     filt = filter_physio(phys, [5.0, 15.0], "bandpass")
     path = io.save_history(temp_history, filt)  # dump history=
 
