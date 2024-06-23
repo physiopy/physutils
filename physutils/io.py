@@ -153,6 +153,29 @@ def load_history(file, verbose=False):
     # TODO: These will need to be imported in order to replay history from this module. Unless another way is found
     # import peakdet
     # import phys2denoise
+    pkg_str = ""
+    peakdet_imported = True
+    phys2denoise_imported = True
+
+    try:
+        import peakdet  # noqa
+    except ImportError:
+        peakdet_imported = False
+        pkg_str += "peakdet"
+
+    try:
+        import phys2denoise  # noqa
+    except ImportError:
+        phys2denoise_imported = False
+        if not peakdet_imported:
+            pkg_str += ", "
+        pkg_str += "phys2denoise"
+
+    if not peakdet_imported or not phys2denoise_imported:
+        logger.warning(
+            f"The following packages are not installed: ({pkg_str}). "
+            "Note that loading history that uses those modules will not be possible"
+        )
 
     # grab history from provided JSON file
     with open(file, "r") as src:
