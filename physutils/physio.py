@@ -147,7 +147,14 @@ def check_physio(data, ensure_fs=True, copy=False):
         raise ValueError("Provided data does not have valid sampling rate.")
     if copy is True:
         return new_physio_like(
-            data, data.data, copy_history=True, copy_metadata=True, copy_suppdata=True
+            data,
+            data.data,
+            copy_history=True,
+            copy_metadata=True,
+            copy_suppdata=True,
+            copy_label=True,
+            copy_physio_type=True,
+            copy_computed_metrics=True,
         )
     return data
 
@@ -162,6 +169,9 @@ def new_physio_like(
     copy_history=True,
     copy_metadata=True,
     copy_suppdata=True,
+    copy_label=True,
+    copy_physio_type=True,
+    copy_computed_metrics=True,
 ):
     """
     Makes `data` into physio object like `ref_data`
@@ -185,6 +195,12 @@ def new_physio_like(
         Copy metadata from `ref_physio` to new physio object. Default: True
     copy_suppdata : bool, optional
         Copy suppdata from `ref_physio` to new physio object. Default: True
+    copy_label : bool, optional
+        Copy label from `ref_physio` to new physio object. Default: True
+    copy_physio_type : bool, optional
+        Copy physio_type from `ref_physio` to new physio object. Default: True
+    copy_computed_metrics : bool, optional
+        Copy computeed_metrics from `ref_physio` to new physio object. Default: True
 
     Returns
     -------
