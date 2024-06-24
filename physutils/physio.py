@@ -314,6 +314,7 @@ class Physio:
                 reject=np.empty(0, dtype=int),
             )
         self._suppdata = None if suppdata is None else np.asarray(suppdata).squeeze()
+        self._computed_metrics = []
 
     def __array__(self):
         return self.data
@@ -377,6 +378,11 @@ class Physio:
     def physio_type(self):
         """Physiological signal type"""
         return self._physio_type
+
+    @property
+    def computed_metrics(self):
+        """Physio object computed metrics (phys2denoise)"""
+        return self._computed_metrics
 
     def plot_physio(self, *, ax=None):
         """
