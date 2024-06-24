@@ -417,7 +417,7 @@ class Physio:
         ax : :class:`matplotlib.axes.Axes`
             Axis with plotted `Physio.data`
         """
-        logger.debug(f"Plotting {self}")
+        logger.debug(f"Plotting {self.label}")
         # generate x-axis time series
         fs = 1 if np.isnan(self.fs) else self.fs
         time = np.arange(0, len(self) / fs, 1 / fs)
