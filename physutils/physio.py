@@ -245,6 +245,10 @@ class Physio:
         Indices of troughs in `data`
     suppdata : :obj:`numpy.ndarray`
         Secondary physiological waveform
+    physio_type : {'respiratory', 'cardiac', None}
+        Type of the contained physiological signal. Default: None
+    label : string
+        Label of the physiological signal
     """
 
     def __init__(
@@ -257,6 +261,7 @@ class Physio:
         physio_type=None,
         label=None,
     ):
+        _supported_physio_types = ["respiratory", "cardiac", None]
         logger.debug("Initializing new Physio object")
         self._data = np.asarray(data).squeeze()
         if self.data.ndim > 1:
@@ -269,7 +274,14 @@ class Physio:
                 "Provided data of type {} is not numeric.".format(self.data.dtype)
             )
         self._fs = np.float64(fs)
-        self._physio_type = physio_type
+        self._physio_type = None if physio_type is None else physio_type
+        if self.physio_type not in _supported_physio_types:
+            raise ValueError(
+                "Provided physiological signal type {} is not supported. It must be in {}".format(
+                    self.physio_type, _supported_physio_types
+                )
+            )
+
         self._label = label
         self._history = [] if history is None else history
         if not isinstance(self._history, list) or any(
