@@ -220,6 +220,10 @@ def new_physio_like(
 
     if suppdata is None:
         suppdata = ref_physio._suppdata if copy_suppdata else None
+    
+    label = ref_physio.label if copy_label else None
+    physio_type = ref_physio.physio_type if copy_physio_type else None
+    computed_metrics = list(ref_physio.computed_metrics) if copy_computed_metrics else []
 
     # make new class
     out = ref_physio.__class__(
@@ -228,7 +232,10 @@ def new_physio_like(
         history=history,
         metadata=metadata,
         suppdata=suppdata,
+        physio_type=physio_type,
+        label=label,
     )
+    out._computed_metrics = computed_metrics
     return out
 
 
