@@ -44,7 +44,7 @@ def make_operation(*, exclude=None):
             data = func(data, *args, **kwargs)
 
             # it shouldn't be, but don't bother appending to history if it is
-            if data[0] is None:
+            if data is None:
                 return data
 
             # get parameters and sort by key name, dropping ignored items and
@@ -57,7 +57,10 @@ def make_operation(*, exclude=None):
                     provided[k] = v.tolist()
 
             # append everything to data instance history
-            data[0]._history += [(name, provided)]
+            if isinstance(data, tuple):
+                data[0]._history += [(name, provided)]
+            else:
+                data._history += [(name, provided)]
 
             return data
 
