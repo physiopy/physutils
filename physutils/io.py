@@ -8,11 +8,127 @@ import json
 import os.path as op
 
 import numpy as np
+from bids import BIDSLayout, BIDSValidator
 from loguru import logger
 
 from physutils import physio
 
 EXPECTED = ["data", "fs", "history", "metadata"]
+
+
+def load_from_bids(
+    bids_path,
+    subject,
+    session=None,
+    task=None,
+    run=None,
+    extension="tsv.gz",
+    suffix="physio",
+):
+    """
+    Load physiological data from BIDS-formatted directory
+
+    Parameters
+    ----------
+    bids_path : str
+        Path to BIDS-formatted directory
+    subject : str
+        Subject identifier
+    session : str
+        Session identifier
+    task : str
+        Task identifier
+    run : str
+        Run identifier
+    suffix : str
+        Suffix of file to load
+
+    Returns
+    -------
+    data : :class:`physutils.Physio`
+        Loaded physiological data
+    """
+    _supported_columns = [
+        "cardiac",
+        "respiratory",
+        "trigger",
+        "rsp",
+        "ppg",
+        "tr",
+        "time",
+    ]
+    validator = BIDSValidator()
+
+    # check if file exists and is in BIDS format
+    if not op.exists(bids_path):
+        raise FileNotFoundError(f"Provided path {bids_path} does not exist")
+    if not validator.is_bids(bids_path):
+        raise ValueError(f"Provided path {bids_path} is not a BIDS directory")
+
+    layout = BIDSLayout(bids_path)
+    bids_file = layout.get(
+        subject=subject,
+        session=session,
+        task=task,
+        run=run,
+        suffix=suffix,
+        extension=extension,
+    )[0]
+    if len(bids_file) == 0:
+        raise FileNotFoundError(
+            f"No files found for subject {subject}, session {session}, task {task}, run {run}"
+        )
+    if len(bids_file) > 1:
+        raise ValueError(
+            f"Multiple files found for subject {subject}, session {session}, task {task}, run {run}"
+        )
+
+    config_file = bids_file.get_metadata()
+    fs = config_file["SamplingFrequency"]
+    t_start = config_file["StartTime"]  # noqa
+    columns = config_file["Columns"]
+
+    physio_objects = {}
+    data = np.loadtxt(op.join(bids_file.dirname, bids_file.path))
+
+    if "time" in columns:
+        idx_0 = np.argmax(data[:, columns.index("time")] >= 0)
+    else:
+        idx_0 = 0
+        logger.warning(
+            "No time column found in file. Assuming data starts at the beginning of the file"
+        )
+
+    for col in columns:
+        if col not in _supported_columns:
+            raise ValueError(
+                f"Column {col} is not supported. Supported columns are {_supported_columns}"
+            )
+        if col in ["cardiac", "ppg", "ecg"]:
+            physio_type = "cardiac"
+        if col in ["respiratory", "rsp"]:
+            physio_type = "respiratory"
+        if col in ["trigger", "tr"]:
+            physio_type = "trigger"
+        if col in ["time"]:
+            continue
+
+        if physio_type == "cardiac" or "respiratory":
+            physio_objects[physio_type] = physio.Physio(
+                data[idx_0:][columns.index(col)],
+                fs=fs,
+                history=[physio._get_call(exclude=[])],
+            )
+            physio_objects[physio_type]._physio_type = physio_type
+            physio_objects[physio_type].label = bids_file.filename.split(".")[
+                0
+            ].replace("_physio", "")
+
+        if physio_type == "trigger":
+            # TODO: Implement trigger loading using the MRI data object
+            logger.warning("Trigger loading not yet implemented")
+
+    return physio_objects
 
 
 def load_physio(data, *, fs=None, dtype=None, history=None, allow_pickle=False):
