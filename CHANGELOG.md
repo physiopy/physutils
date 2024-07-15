@@ -1,3 +1,19 @@
+# 0.1.0 (Mon Jul 15 2024)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, Stefano Moia ([@smoia](https://github.com/smoia)), for all your work!
+
+#### 🚀 Enhancement
+
+- feat: update config file ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.0.1 (Thu Jul 11 2024)
 
 :tada: This release contains work from a new contributor! :tada:
