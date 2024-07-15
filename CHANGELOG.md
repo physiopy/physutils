@@ -1,3 +1,15 @@
+# 0.2.0 (Mon Jul 15 2024)
+
+#### 🚀 Enhancement
+
+- feat: Update workflows and setup ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.1.0 (Mon Jul 15 2024)
 
 :tada: This release contains work from a new contributor! :tada:
