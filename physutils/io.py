@@ -48,15 +48,6 @@ def load_from_bids(
     data : :class:`physutils.Physio`
         Loaded physiological data
     """
-    _supported_columns = [
-        "cardiac",
-        "respiratory",
-        "trigger",
-        "rsp",
-        "ppg",
-        "tr",
-        "time",
-    ]
 
     # check if file exists and is in BIDS format
     if not op.exists(bids_path):
@@ -99,16 +90,18 @@ def load_from_bids(
 
     for col in columns:
         col_physio_type = None
-        if col not in _supported_columns:
-            logger.warning(f"Column {col} is not supported. Skipping")
-        if col in ["cardiac", "ppg", "ecg"]:
+        if any([x in col for x in ["cardiac", "ppg", "ecg", "card"]]):
             col_physio_type = "cardiac"
-        if col in ["respiratory", "rsp"]:
+        elif any([x in col for x in ["respiratory", "rsp", "resp"]]):
             col_physio_type = "respiratory"
-        if col in ["trigger", "tr"]:
+        elif any([x in col for x in ["trigger", "tr"]]):
             col_physio_type = "trigger"
-        if col in ["time"]:
+        elif any([x in col for x in ["time"]]):
             continue
+        else:
+            logger.warning(
+                f"Column {col}'s type cannot be determined. Additional features may be missing."
+            )
 
         if col_physio_type == "cardiac" or "respiratory":
             physio_objects[col_physio_type] = physio.Physio(
