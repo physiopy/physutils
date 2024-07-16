@@ -103,14 +103,14 @@ def load_from_bids(
                 f"Column {col}'s type cannot be determined. Additional features may be missing."
             )
 
-        if col_physio_type == "cardiac" or "respiratory":
-            physio_objects[col_physio_type] = physio.Physio(
+        if col_physio_type in ["cardiac", "respiratory"]:
+            physio_objects[col] = physio.Physio(
                 data[idx_0:, columns.index(col)],
                 fs=fs,
                 history=[physio._get_call(exclude=[])],
             )
-            physio_objects[col_physio_type]._physio_type = col_physio_type
-            physio_objects[col_physio_type]._label = (
+            physio_objects[col]._physio_type = col_physio_type
+            physio_objects[col]._label = (
                 bids_file[0].filename.split(".")[0].replace("_physio", "")
             )
 
