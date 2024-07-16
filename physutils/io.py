@@ -8,7 +8,7 @@ import json
 import os.path as op
 
 import numpy as np
-from bids import BIDSLayout, BIDSValidator
+from bids import BIDSLayout
 from loguru import logger
 
 from physutils import physio
@@ -57,13 +57,10 @@ def load_from_bids(
         "tr",
         "time",
     ]
-    validator = BIDSValidator()
 
     # check if file exists and is in BIDS format
     if not op.exists(bids_path):
         raise FileNotFoundError(f"Provided path {bids_path} does not exist")
-    if not validator.is_bids(bids_path):
-        raise ValueError(f"Provided path {bids_path} is not a BIDS directory")
 
     layout = BIDSLayout(bids_path)
     bids_file = layout.get(
@@ -73,7 +70,7 @@ def load_from_bids(
         run=run,
         suffix=suffix,
         extension=extension,
-    )[0]
+    )
     if len(bids_file) == 0:
         raise FileNotFoundError(
             f"No files found for subject {subject}, session {session}, task {task}, run {run}"
@@ -83,13 +80,14 @@ def load_from_bids(
             f"Multiple files found for subject {subject}, session {session}, task {task}, run {run}"
         )
 
-    config_file = bids_file.get_metadata()
+    config_file = bids_file[0].get_metadata()
     fs = config_file["SamplingFrequency"]
     t_start = config_file["StartTime"]  # noqa
     columns = config_file["Columns"]
+    logger.debug(f"Loaded structure contains columns: {columns}")
 
     physio_objects = {}
-    data = np.loadtxt(op.join(bids_file.dirname, bids_file.path))
+    data = np.loadtxt(bids_file[0].path)
 
     if "time" in columns:
         idx_0 = np.argmax(data[:, columns.index("time")] >= 0)
@@ -100,31 +98,30 @@ def load_from_bids(
         )
 
     for col in columns:
+        col_physio_type = None
         if col not in _supported_columns:
-            raise ValueError(
-                f"Column {col} is not supported. Supported columns are {_supported_columns}"
-            )
+            logger.warning(f"Column {col} is not supported. Skipping")
         if col in ["cardiac", "ppg", "ecg"]:
-            physio_type = "cardiac"
+            col_physio_type = "cardiac"
         if col in ["respiratory", "rsp"]:
-            physio_type = "respiratory"
+            col_physio_type = "respiratory"
         if col in ["trigger", "tr"]:
-            physio_type = "trigger"
+            col_physio_type = "trigger"
         if col in ["time"]:
             continue
 
-        if physio_type == "cardiac" or "respiratory":
-            physio_objects[physio_type] = physio.Physio(
-                data[idx_0:][columns.index(col)],
+        if col_physio_type == "cardiac" or "respiratory":
+            physio_objects[col_physio_type] = physio.Physio(
+                data[idx_0:, columns.index(col)],
                 fs=fs,
                 history=[physio._get_call(exclude=[])],
             )
-            physio_objects[physio_type]._physio_type = physio_type
-            physio_objects[physio_type].label = bids_file.filename.split(".")[
-                0
-            ].replace("_physio", "")
+            physio_objects[col_physio_type]._physio_type = col_physio_type
+            physio_objects[col_physio_type]._label = (
+                bids_file[0].filename.split(".")[0].replace("_physio", "")
+            )
 
-        if physio_type == "trigger":
+        if col_physio_type == "trigger":
             # TODO: Implement trigger loading using the MRI data object
             logger.warning("Trigger loading not yet implemented")
 
