@@ -116,7 +116,12 @@ def load_from_bids(
 
         if col_physio_type == "trigger":
             # TODO: Implement trigger loading using the MRI data object
-            logger.warning("Trigger loading not yet implemented")
+            logger.warning("MRI trigger characteristics extraction not yet implemented")
+            physio_objects[col] = physio.Physio(
+                data[idx_0:, columns.index(col)],
+                fs=fs,
+                history=[physio._get_call(exclude=[])],
+            )
 
     return physio_objects
 
