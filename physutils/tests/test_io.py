@@ -7,7 +7,11 @@ import numpy as np
 import pytest
 
 from physutils import io, physio
-from physutils.tests.utils import filter_physio, get_test_data_path
+from physutils.tests.utils import (
+    create_random_bids_structure,
+    filter_physio,
+    get_test_data_path,
+)
 
 
 def test_load_physio(caplog):
@@ -44,6 +48,24 @@ def test_load_physio(caplog):
     assert out.history[-1][0] == "physutils.io.load_physio"
     with pytest.raises(TypeError):
         io.load_physio([1, 2, 3])
+
+
+def test_load_from_bids():
+    create_random_bids_structure("physutils/tests/data")
+    phys_array = io.load_from_bids(
+        "physutils/tests/data/bids-dir",
+        subject="01",
+        session="01",
+        task="rest",
+        run="01",
+    )
+
+    for col in phys_array.keys():
+        assert isinstance(phys_array[col], physio.Physio)
+        # The data saved are the ones after t_0 = 0s
+        assert phys_array[col].data.size == 70000
+        assert phys_array[col].fs == 10000.0
+        assert phys_array[col].history[0][0] == "physutils.io.load_from_bids"
 
 
 def test_save_physio(tmpdir):

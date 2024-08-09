@@ -136,7 +136,7 @@ def create_random_bids_structure(data_dir):
 
     # Initialize tsv file with random data columns and a time column
     num_rows = 100000
-    num_cols = 5
+    num_cols = 6
     time = (
         np.arange(num_rows) / physio_json["SamplingFrequency"]
         + physio_json["StartTime"]
