@@ -22,6 +22,7 @@ def load_from_bids(
     session=None,
     task=None,
     run=None,
+    recording=None,
     extension="tsv.gz",
     suffix="physio",
 ):
@@ -53,7 +54,7 @@ def load_from_bids(
     if not op.exists(bids_path):
         raise FileNotFoundError(f"Provided path {bids_path} does not exist")
 
-    layout = BIDSLayout(bids_path)
+    layout = BIDSLayout(bids_path, validate=False)
     bids_file = layout.get(
         subject=subject,
         session=session,
@@ -61,6 +62,7 @@ def load_from_bids(
         run=run,
         suffix=suffix,
         extension=extension,
+        recording=recording,
     )
     if len(bids_file) == 0:
         raise FileNotFoundError(
@@ -90,13 +92,13 @@ def load_from_bids(
 
     for col in columns:
         col_physio_type = None
-        if any([x in col for x in ["cardiac", "ppg", "ecg", "card"]]):
+        if any([x in col.lower() for x in ["cardiac", "ppg", "ecg", "card"]]):
             col_physio_type = "cardiac"
-        elif any([x in col for x in ["respiratory", "rsp", "resp"]]):
+        elif any([x in col.lower() for x in ["respiratory", "rsp", "resp"]]):
             col_physio_type = "respiratory"
-        elif any([x in col for x in ["trigger", "tr"]]):
+        elif any([x in col.lower() for x in ["trigger", "tr"]]):
             col_physio_type = "trigger"
-        elif any([x in col for x in ["time"]]):
+        elif any([x in col.lower() for x in ["time"]]):
             continue
         else:
             logger.warning(
