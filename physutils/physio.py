@@ -224,7 +224,7 @@ def new_physio_like(
     label = ref_physio.label if copy_label else None
     physio_type = ref_physio.physio_type if copy_physio_type else None
     computed_metrics = (
-        list(ref_physio.computed_metrics) if copy_computed_metrics else []
+        dict(ref_physio.computed_metrics) if copy_computed_metrics else []
     )
 
     # make new class
