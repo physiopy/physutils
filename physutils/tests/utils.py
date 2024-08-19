@@ -138,9 +138,11 @@ def create_random_bids_structure(data_dir):
     # Initialize tsv file with random data columns and a time column
     num_rows = 100000
     num_cols = 6
+    time_offset = 2
     time = (
         np.arange(num_rows) / physio_json["SamplingFrequency"]
         + physio_json["StartTime"]
+        - time_offset
     )
     data = np.column_stack((time, np.random.rand(num_rows, num_cols - 1).round(8)))
     df = pd.DataFrame(data)

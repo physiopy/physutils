@@ -76,7 +76,7 @@ def load_from_bids(
 
     config_file = bids_file[0].get_metadata()
     fs = config_file["SamplingFrequency"]
-    t_start = config_file["StartTime"]  # noqa
+    t_start = config_file["StartTime"] if "StartTime" in config_file else 0
     columns = config_file["Columns"]
     logger.debug(f"Loaded structure contains columns: {columns}")
 
@@ -84,7 +84,7 @@ def load_from_bids(
     data = np.loadtxt(bids_file[0].path)
 
     if "time" in columns:
-        idx_0 = np.argmax(data[:, columns.index("time")] >= 0)
+        idx_0 = np.argmax(data[:, columns.index("time")] >= t_start)
     else:
         idx_0 = 0
         logger.warning(

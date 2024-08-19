@@ -563,12 +563,6 @@ class MRIConfig:
     def __init__(self, slice_timings=None, n_scans=None, tr=None):
         if np.ndim(slice_timings) > 1:
             raise ValueError("Slice timings must be a 1-dimensional array.")
-        if np.size(slice_timings) != n_scans:
-            raise ValueError(
-                "Number of slice timings ({}) must match number of scans ({}).".format(
-                    np.size(slice_timings), n_scans
-                )
-            )
 
         self._slice_timings = np.asarray(slice_timings)
         self._n_scans = int(n_scans)

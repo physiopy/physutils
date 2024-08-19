@@ -63,8 +63,8 @@ def test_load_from_bids():
 
     for col in phys_array.keys():
         assert isinstance(phys_array[col], physio.Physio)
-        # The data saved are the ones after t_0 = 0s
-        assert phys_array[col].data.size == 70000
+        # The data saved are the ones after t_0 = -3s
+        assert phys_array[col].data.size == 80000
         assert phys_array[col].fs == 10000.0
         assert phys_array[col].history[0][0] == "physutils.io.load_from_bids"
 
