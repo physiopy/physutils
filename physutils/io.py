@@ -64,13 +64,14 @@ def load_from_bids(
         extension=extension,
         recording=recording,
     )
+    logger.debug(f"BIDS file found: {bids_file}")
     if len(bids_file) == 0:
         raise FileNotFoundError(
-            f"No files found for subject {subject}, session {session}, task {task}, run {run}"
+            f"No files found for subject {subject}, session {session}, task {task}, run {run}, recording {recording}"
         )
     if len(bids_file) > 1:
         raise ValueError(
-            f"Multiple files found for subject {subject}, session {session}, task {task}, run {run}"
+            f"Multiple files found for subject {subject}, session {session}, task {task}, run {run}, recording {recording}"
         )
 
     config_file = bids_file[0].get_metadata()
@@ -92,9 +93,14 @@ def load_from_bids(
 
     for col in columns:
         col_physio_type = None
-        if any([x in col.lower() for x in ["cardiac", "ppg", "ecg", "card"]]):
+        if any([x in col.lower() for x in ["cardiac", "ppg", "ecg", "card", "pulse"]]):
             col_physio_type = "cardiac"
-        elif any([x in col.lower() for x in ["respiratory", "rsp", "resp"]]):
+        elif any(
+            [
+                x in col.lower()
+                for x in ["respiratory", "rsp", "resp", "breath", "co2", "o2"]
+            ]
+        ):
             col_physio_type = "respiratory"
         elif any([x in col.lower() for x in ["trigger", "tr"]]):
             col_physio_type = "trigger"

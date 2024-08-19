@@ -58,6 +58,7 @@ def test_load_from_bids():
         session="01",
         task="rest",
         run="01",
+        recording="cardiac",
     )
 
     for col in phys_array.keys():

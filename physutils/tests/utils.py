@@ -114,6 +114,7 @@ def create_random_bids_structure(data_dir):
     session_id = "01"
     task_id = "rest"
     run_id = "01"
+    recording_id = "cardiac"
 
     bids_dir = pjoin(
         data_dir, "bids-dir", f"sub-{subject_id}", f"ses-{session_id}", "func"
@@ -128,7 +129,7 @@ def create_random_bids_structure(data_dir):
     with open(
         pjoin(
             bids_dir,
-            f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_physio.json",
+            f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_recording-{recording_id}_physio.json",
         ),
         "w",
     ) as f:
@@ -145,14 +146,14 @@ def create_random_bids_structure(data_dir):
     df = pd.DataFrame(data)
     tsv_file = pjoin(
         bids_dir,
-        f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_physio.tsv",
+        f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_recording-{recording_id}_physio.tsv",
     )
     df.to_csv(tsv_file, sep="\t", index=False, header=False, float_format="%.8e")
 
     # Compress tsv file into tsv.gz
     tsv_gz_file = pjoin(
         bids_dir,
-        f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_physio.tsv.gz",
+        f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_recording-{recording_id}_physio.tsv.gz",
     )
     pd.read_csv(tsv_file, sep="\t").to_csv(
         tsv_gz_file, sep="\t", index=False, compression="gzip"
