@@ -5,6 +5,7 @@ Functions for loading and saving data and analyses
 
 import importlib
 import json
+import os
 import os.path as op
 
 import numpy as np
@@ -140,7 +141,7 @@ def load_physio(data, *, fs=None, dtype=None, history=None, allow_pickle=False):
 
     Parameters
     ----------
-    data : str or array_like or Physio_like
+    data : str, os.path.PathLike or array_like or Physio_like
         Input physiological data. If array_like, should be one-dimensional
     fs : float, optional
         Sampling rate of `data`. Default: None
@@ -165,7 +166,7 @@ def load_physio(data, *, fs=None, dtype=None, history=None, allow_pickle=False):
 
     # first check if the file was made with `save_physio`; otherwise, try to
     # load it as a plain text file and instantiate a history
-    if isinstance(data, str):
+    if isinstance(data, str) or isinstance(data, os.PathLike):
         try:
             inp = dict(np.load(data, allow_pickle=allow_pickle))
             for attr in EXPECTED:
