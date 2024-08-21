@@ -82,7 +82,7 @@ def filter_physio(data, cutoffs, method, *, order=3):
     return filtered
 
 
-def create_random_bids_structure(data_dir):
+def create_random_bids_structure(data_dir, recording_id=None):
 
     dataset_description = {
         "Name": "Example BIDS Dataset",
@@ -114,7 +114,7 @@ def create_random_bids_structure(data_dir):
     session_id = "01"
     task_id = "rest"
     run_id = "01"
-    recording_id = "cardiac"
+    recording_id = recording_id
 
     bids_dir = pjoin(
         data_dir, "bids-dir", f"sub-{subject_id}", f"ses-{session_id}", "func"
@@ -125,11 +125,16 @@ def create_random_bids_structure(data_dir):
     with open(pjoin(data_dir, "bids-dir", "dataset_description.json"), "w") as f:
         json.dump(dataset_description, f, indent=4)
 
+    if recording_id is not None:
+        filename_body = f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_recording-{recording_id}"
+    else:
+        filename_body = f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}"
+
     # Create physio.json
     with open(
         pjoin(
             bids_dir,
-            f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_recording-{recording_id}_physio.json",
+            f"{filename_body}_physio.json",
         ),
         "w",
     ) as f:
@@ -146,19 +151,20 @@ def create_random_bids_structure(data_dir):
     )
     data = np.column_stack((time, np.random.rand(num_rows, num_cols - 1).round(8)))
     df = pd.DataFrame(data)
-    tsv_file = pjoin(
-        bids_dir,
-        f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_recording-{recording_id}_physio.tsv",
-    )
-    df.to_csv(tsv_file, sep="\t", index=False, header=False, float_format="%.8e")
 
-    # Compress tsv file into tsv.gz
+    # Compress dataframe into tsv.gz
     tsv_gz_file = pjoin(
         bids_dir,
-        f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_recording-{recording_id}_physio.tsv.gz",
+        f"{filename_body}_physio.tsv.gz",
     )
-    pd.read_csv(tsv_file, sep="\t").to_csv(
-        tsv_gz_file, sep="\t", index=False, compression="gzip"
+
+    df.to_csv(
+        tsv_gz_file,
+        sep="\t",
+        index=False,
+        header=False,
+        float_format="%.8e",
+        compression="gzip",
     )
 
     return bids_dir

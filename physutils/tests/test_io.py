@@ -51,7 +51,7 @@ def test_load_physio(caplog):
 
 
 def test_load_from_bids():
-    create_random_bids_structure("physutils/tests/data")
+    create_random_bids_structure("physutils/tests/data", recording_id="cardiac")
     phys_array = io.load_from_bids(
         "physutils/tests/data/bids-dir",
         subject="01",
@@ -59,6 +59,24 @@ def test_load_from_bids():
         task="rest",
         run="01",
         recording="cardiac",
+    )
+
+    for col in phys_array.keys():
+        assert isinstance(phys_array[col], physio.Physio)
+        # The data saved are the ones after t_0 = -3s
+        assert phys_array[col].data.size == 80000
+        assert phys_array[col].fs == 10000.0
+        assert phys_array[col].history[0][0] == "physutils.io.load_from_bids"
+
+
+def test_load_from_bids_no_rec():
+    create_random_bids_structure("physutils/tests/data")
+    phys_array = io.load_from_bids(
+        "physutils/tests/data/bids-dir",
+        subject="01",
+        session="01",
+        task="rest",
+        run="01",
     )
 
     for col in phys_array.keys():
