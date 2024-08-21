@@ -125,3 +125,7 @@ dmypy.json
 .pyre/
 
 .vscode/
+
+# Test Data
+physutils/tests/data/bids-dir
+tmp.*
