@@ -1,3 +1,19 @@
+# 0.2.1 (Sun Aug 25 2024)
+
+#### 🐛 Bug Fix
+
+- Release Fix [#6](https://github.com/physiopy/physutils/pull/6) ([@maestroque](https://github.com/maestroque))
+
+#### ⚠️ Tests
+
+- Add Physio object generation from BIDS [#4](https://github.com/physiopy/physutils/pull/4) ([@maestroque](https://github.com/maestroque))
+
+#### Authors: 1
+
+- George Kikas ([@maestroque](https://github.com/maestroque))
+
+---
+
 # 0.2.0 (Mon Jul 15 2024)
 
 #### 🚀 Enhancement
