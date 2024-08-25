@@ -1,6 +1,6 @@
 import pydra
 
-from physutils.io import load_history, load_physio
+from physutils.io import load_from_bids, load_history, load_physio
 from physutils.physio import Physio
 
 
@@ -11,8 +11,7 @@ def transform_to_physio(input_file: str, mode="physio") -> Physio:
     elif mode == "history":
         physio_obj = load_history(input_file)
     elif mode == "bids":
-        # TODO: Implement BIDS loading once the bids-support branch is merged
-        raise NotImplementedError("BIDS loading is not yet implemented")
+        physio_obj = load_from_bids(input_file)
     else:
         raise ValueError(f"Invalid transform_to_physio mode: {mode}")
     return physio_obj
