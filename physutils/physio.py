@@ -372,7 +372,7 @@ class Physio:
 
     @property
     def history(self):
-        """Functions that have been performed on / modified `data`"""
+        """Functions that have been performed on / modified `data`."""
         return self._history
 
     @property
