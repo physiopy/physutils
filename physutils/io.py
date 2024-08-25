@@ -5,14 +5,134 @@ Functions for loading and saving data and analyses
 
 import importlib
 import json
+import os
 import os.path as op
 
 import numpy as np
+from bids import BIDSLayout
 from loguru import logger
 
 from physutils import physio
 
 EXPECTED = ["data", "fs", "history", "metadata"]
+
+
+def load_from_bids(
+    bids_path,
+    subject,
+    session=None,
+    task=None,
+    run=None,
+    recording=None,
+    extension="tsv.gz",
+    suffix="physio",
+):
+    """
+    Load physiological data from BIDS-formatted directory
+
+    Parameters
+    ----------
+    bids_path : str
+        Path to BIDS-formatted directory
+    subject : str
+        Subject identifier
+    session : str
+        Session identifier
+    task : str
+        Task identifier
+    run : str
+        Run identifier
+    suffix : str
+        Suffix of file to load
+
+    Returns
+    -------
+    data : :class:`physutils.Physio`
+        Loaded physiological data
+    """
+
+    # check if file exists and is in BIDS format
+    if not op.exists(bids_path):
+        raise FileNotFoundError(f"Provided path {bids_path} does not exist")
+
+    layout = BIDSLayout(bids_path, validate=False)
+    bids_file = layout.get(
+        subject=subject,
+        session=session,
+        task=task,
+        run=run,
+        suffix=suffix,
+        extension=extension,
+        recording=recording,
+    )
+    logger.debug(f"BIDS file found: {bids_file}")
+    if len(bids_file) == 0:
+        raise FileNotFoundError(
+            f"No files found for subject {subject}, session {session}, task {task}, run {run}, recording {recording}"
+        )
+    if len(bids_file) > 1:
+        raise ValueError(
+            f"Multiple files found for subject {subject}, session {session}, task {task}, run {run}, recording {recording}"
+        )
+
+    config_file = bids_file[0].get_metadata()
+    fs = config_file["SamplingFrequency"]
+    t_start = config_file["StartTime"] if "StartTime" in config_file else 0
+    columns = config_file["Columns"]
+    logger.debug(f"Loaded structure contains columns: {columns}")
+
+    physio_objects = {}
+    data = np.loadtxt(bids_file[0].path)
+
+    if "time" in columns:
+        idx_0 = np.argmax(data[:, columns.index("time")] >= t_start)
+    else:
+        idx_0 = 0
+        logger.warning(
+            "No time column found in file. Assuming data starts at the beginning of the file"
+        )
+
+    for col in columns:
+        col_physio_type = None
+        if any([x in col.lower() for x in ["cardiac", "ppg", "ecg", "card", "pulse"]]):
+            col_physio_type = "cardiac"
+        elif any(
+            [
+                x in col.lower()
+                for x in ["respiratory", "rsp", "resp", "breath", "co2", "o2"]
+            ]
+        ):
+            col_physio_type = "respiratory"
+        elif any([x in col.lower() for x in ["trigger", "tr"]]):
+            col_physio_type = "trigger"
+        elif any([x in col.lower() for x in ["time"]]):
+            continue
+        else:
+            logger.warning(
+                f"Column {col}'s type cannot be determined. Additional features may be missing."
+            )
+
+        if col_physio_type in ["cardiac", "respiratory"]:
+            physio_objects[col] = physio.Physio(
+                data[idx_0:, columns.index(col)],
+                fs=fs,
+                history=[physio._get_call(exclude=[])],
+            )
+            physio_objects[col]._physio_type = col_physio_type
+            physio_objects[col]._label = (
+                bids_file[0].filename.split(".")[0].replace("_physio", "")
+            )
+
+        if col_physio_type == "trigger":
+            # TODO: Implement trigger loading using the MRI data object
+            logger.warning("MRI trigger characteristics extraction not yet implemented")
+            physio_objects[col] = physio.Physio(
+                data[idx_0:, columns.index(col)],
+                fs=fs,
+                history=[physio._get_call(exclude=[])],
+            )
+
+    return physio_objects
 
 
 def load_physio(data, *, fs=None, dtype=None, history=None, allow_pickle=False):
@@ -21,7 +141,7 @@ def load_physio(data, *, fs=None, dtype=None, history=None, allow_pickle=False):
 
     Parameters
     ----------
-    data : str or array_like or Physio_like
+    data : str, os.path.PathLike or array_like or Physio_like
         Input physiological data. If array_like, should be one-dimensional
     fs : float, optional
         Sampling rate of `data`. Default: None
@@ -46,7 +166,7 @@ def load_physio(data, *, fs=None, dtype=None, history=None, allow_pickle=False):
 
     # first check if the file was made with `save_physio`; otherwise, try to
     # load it as a plain text file and instantiate a history
-    if isinstance(data, str):
+    if isinstance(data, str) or isinstance(data, os.PathLike):
         try:
             inp = dict(np.load(data, allow_pickle=allow_pickle))
             for attr in EXPECTED:

@@ -2,9 +2,12 @@
 Utilities for testing
 """
 
+import json
+from os import makedirs
 from os.path import join as pjoin
 
 import numpy as np
+import pandas as pd
 from pkg_resources import resource_filename
 from scipy import signal
 
@@ -77,3 +80,91 @@ def filter_physio(data, cutoffs, method, *, order=3):
     filtered = physio.new_physio_like(data, signal.filtfilt(b, a, data))
 
     return filtered
+
+
+def create_random_bids_structure(data_dir, recording_id=None):
+
+    dataset_description = {
+        "Name": "Example BIDS Dataset",
+        "BIDSVersion": "1.7.0",
+        "License": "",
+        "Authors": ["Author1", "Author2"],
+        "Acknowledgements": "",
+        "HowToAcknowledge": "",
+        "Funding": "",
+        "ReferencesAndLinks": "",
+        "DatasetDOI": "",
+    }
+
+    physio_json = {
+        "SamplingFrequency": 10000.0,
+        "StartTime": -3,
+        "Columns": [
+            "time",
+            "respiratory_chest",
+            "trigger",
+            "cardiac",
+            "respiratory_CO2",
+            "respiratory_O2",
+        ],
+    }
+
+    # Create BIDS structure directory
+    subject_id = "01"
+    session_id = "01"
+    task_id = "rest"
+    run_id = "01"
+    recording_id = recording_id
+
+    bids_dir = pjoin(
+        data_dir, "bids-dir", f"sub-{subject_id}", f"ses-{session_id}", "func"
+    )
+    makedirs(bids_dir, exist_ok=True)
+
+    # Create dataset_description.json
+    with open(pjoin(data_dir, "bids-dir", "dataset_description.json"), "w") as f:
+        json.dump(dataset_description, f, indent=4)
+
+    if recording_id is not None:
+        filename_body = f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}_recording-{recording_id}"
+    else:
+        filename_body = f"sub-{subject_id}_ses-{session_id}_task-{task_id}_run-{run_id}"
+
+    # Create physio.json
+    with open(
+        pjoin(
+            bids_dir,
+            f"{filename_body}_physio.json",
+        ),
+        "w",
+    ) as f:
+        json.dump(physio_json, f, indent=4)
+
+    # Initialize tsv file with random data columns and a time column
+    num_rows = 100000
+    num_cols = 6
+    time_offset = 2
+    time = (
+        np.arange(num_rows) / physio_json["SamplingFrequency"]
+        + physio_json["StartTime"]
+        - time_offset
+    )
+    data = np.column_stack((time, np.random.rand(num_rows, num_cols - 1).round(8)))
+    df = pd.DataFrame(data)
+
+    # Compress dataframe into tsv.gz
+    tsv_gz_file = pjoin(
+        bids_dir,
+        f"{filename_body}_physio.tsv.gz",
+    )
+
+    df.to_csv(
+        tsv_gz_file,
+        sep="\t",
+        index=False,
+        header=False,
+        float_format="%.8e",
+        compression="gzip",
+    )
+
+    return bids_dir
