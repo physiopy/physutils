@@ -8,6 +8,7 @@ from functools import wraps
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from loguru import logger
 
 
@@ -146,7 +147,7 @@ def check_physio(data, ensure_fs=True, copy=False):
 
     if not isinstance(data, Physio):
         data = load_physio(data)
-    if ensure_fs and np.isnan(data.fs):
+    if ensure_fs and pd.isna(data.fs):
         raise ValueError("Provided data does not have valid sampling rate.")
     if copy is True:
         return new_physio_like(
