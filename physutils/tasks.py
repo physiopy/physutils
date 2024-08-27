@@ -10,7 +10,9 @@ LGR.setLevel(logging.DEBUG)
 
 
 @pydra.mark.task
-def transform_to_physio(input_file: str, mode="physio", fs=None) -> Physio:
+def transform_to_physio(
+    input_file: str, mode="physio", fs=None, bids_parameters=dict(), bids_channel=None
+) -> Physio:
     LGR.debug(f"Loading physio object from {input_file}")
     if not fs:
         fs = None
@@ -22,7 +24,11 @@ def transform_to_physio(input_file: str, mode="physio", fs=None) -> Physio:
             physio_obj = load_physio(input_file, allow_pickle=True)
 
     elif mode == "bids":
-        physio_obj = load_from_bids(input_file)
+        if bids_parameters is {}:
+            raise ValueError("BIDS parameters must be provided when loading from BIDS")
+        else:
+            physio_array = load_from_bids(input_file, **bids_parameters)
+            physio_obj = physio_array[bids_channel]
     else:
         raise ValueError(f"Invalid transform_to_physio mode: {mode}")
     return physio_obj
