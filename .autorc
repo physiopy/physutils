@@ -9,6 +9,7 @@
   "repo": "physutils",
   "name": "Stefano Moia",
   "email": "s.moia@bcbl.eu",
+  "defaultReleaseType": "none",
   "labels": [
     {
       "name": "Majormod",
