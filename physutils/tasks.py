@@ -1,6 +1,7 @@
 import logging
+from functools import wraps
 
-import pydra
+from loguru import logger
 
 from physutils.io import load_from_bids, load_physio
 from physutils.physio import Physio
@@ -8,8 +9,46 @@ from physutils.physio import Physio
 LGR = logging.getLogger(__name__)
 LGR.setLevel(logging.DEBUG)
 
+try:
+    import pydra
 
-@pydra.mark.task
+    pydra_imported = True
+except ImportError:
+    logger.warning(
+        "Pydra is not installed, so the physutils tasks are not available as pydra tasks"
+    )
+    LGR.warning(
+        "Pydra is not installed, so the physutils tasks are not available as pydra tasks"
+    )
+    pydra_imported = False
+
+
+def mark_task(pydra_imported=pydra_imported):
+    def decorator(func):
+        if pydra_imported:
+            # If the decorator exists, apply it
+            @wraps(func)
+            def wrapped_func(*args, **kwargs):
+                return pydra.mark.task(func)(*args, **kwargs)
+
+            return wrapped_func
+        # Otherwise, return the original function
+        logger.warning(
+            "Pydra is not installed, so {} is not available as a pydra task".format(
+                func.__name__
+            )
+        )
+        LGR.warning(
+            "Pydra is not installed, so {} is not available as a pydra task".format(
+                func.__name__
+            )
+        )
+        return func
+
+    return decorator
+
+
+@mark_task(pydra_imported=pydra_imported)
 def transform_to_physio(
     input_file: str, mode="physio", fs=None, bids_parameters=dict(), bids_channel=None
 ) -> Physio:
