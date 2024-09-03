@@ -51,3 +51,57 @@ def test_transform_to_physio_bids_file():
 
     physio_obj = task.result().output.out
     assert isinstance(physio_obj, physio.Physio)
+
+
+def test_transform_to_physio_auto():
+    create_random_bids_structure("physutils/tests/data", recording_id="cardiac")
+    bids_parameters = {
+        "subject": "01",
+        "session": "01",
+        "task": "rest",
+        "run": "01",
+        "recording": "cardiac",
+    }
+    bids_dir = os.path.abspath("physutils/tests/data/bids-dir")
+    task = tasks.transform_to_physio(
+        input_file=bids_dir,
+        mode="auto",
+        bids_parameters=bids_parameters,
+        bids_channel="cardiac",
+    )
+
+    assert task.inputs.input_file == bids_dir
+    assert task.inputs.mode == "auto"
+    assert task.inputs.fs is None
+    assert task.inputs.bids_parameters == bids_parameters
+    assert task.inputs.bids_channel == "cardiac"
+
+    task()
+
+    physio_obj = task.result().output.out
+    assert isinstance(physio_obj, physio.Physio)
+
+
+def test_transform_to_physio_auto_error(caplog):
+    bids_dir = os.path.abspath("physutils/tests/data/non-bids-dir")
+    task = tasks.transform_to_physio(
+        input_file=bids_dir,
+        mode="auto",
+        bids_channel="cardiac",
+    )
+
+    assert task.inputs.input_file == bids_dir
+    assert task.inputs.mode == "auto"
+    assert task.inputs.fs is None
+    assert task.inputs.bids_channel == "cardiac"
+
+    try:
+        task()
+    except Exception:
+        assert caplog.text.count("ERROR") == 1
+        assert (
+            caplog.text.count(
+                "dataset_description.json' is missing from project root. Every valid BIDS dataset must have this file."
+            )
+            == 1
+        )

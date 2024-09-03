@@ -1,6 +1,7 @@
 import logging
 from functools import wraps
 
+from bids import BIDSLayout
 from loguru import logger
 
 from physutils.io import load_from_bids, load_physio
@@ -33,6 +34,19 @@ def mark_task(pydra_imported=pydra_imported):
     return decorator
 
 
+def is_bids_directory(directory):
+    try:
+        # Attempt to create a BIDSLayout object
+        _ = BIDSLayout(directory)
+        return True
+    except Exception as e:
+        # Catch other exceptions that might indicate the directory isn't BIDS compliant
+        logger.error(
+            f"An error occurred while trying to load {directory} as a BIDS Layout object: {e}"
+        )
+        return False
+
+
 @mark_task(pydra_imported=pydra_imported)
 def transform_to_physio(
     input_file: str, mode="physio", fs=None, bids_parameters=dict(), bids_channel=None
@@ -45,6 +59,15 @@ def transform_to_physio(
     if not fs:
         fs = None
 
+    if mode == "auto":
+        if input_file.endswith((".phys", ".physio", ".1D", ".txt", ".tsv", ".csv")):
+            mode = "physio"
+        elif is_bids_directory(input_file):
+            mode = "bids"
+        else:
+            raise ValueError(
+                "Could not determine mode automatically, please specify mode"
+            )
     if mode == "physio":
         if fs is not None:
             physio_obj = load_physio(input_file, fs=fs, allow_pickle=True)
