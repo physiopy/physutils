@@ -7,10 +7,10 @@ from physutils import physio
 from physutils.tests.utils import create_random_bids_structure
 
 
-def test_transform_to_physio_phys_file():
-    """Test transform_to_physio task."""
+def test_generate_physio_phys_file():
+    """Test generate_physio task."""
     physio_file = os.path.abspath("physutils/tests/data/ECG.phys")
-    task = tasks.transform_to_physio(input_file=physio_file, mode="physio")
+    task = tasks.generate_physio(input_file=physio_file, mode="physio")
     assert task.inputs.input_file == physio_file
     assert task.inputs.mode == "physio"
     assert task.inputs.fs is None
@@ -23,8 +23,8 @@ def test_transform_to_physio_phys_file():
     assert physio_obj.data.shape == (44611,)
 
 
-def test_transform_to_physio_bids_file():
-    """Test transform_to_physio task."""
+def test_generate_physio_bids_file():
+    """Test generate_physio task."""
     create_random_bids_structure("physutils/tests/data", recording_id="cardiac")
     bids_parameters = {
         "subject": "01",
@@ -34,7 +34,7 @@ def test_transform_to_physio_bids_file():
         "recording": "cardiac",
     }
     bids_dir = os.path.abspath("physutils/tests/data/bids-dir")
-    task = tasks.transform_to_physio(
+    task = tasks.generate_physio(
         input_file=bids_dir,
         mode="bids",
         bids_parameters=bids_parameters,
@@ -53,7 +53,7 @@ def test_transform_to_physio_bids_file():
     assert isinstance(physio_obj, physio.Physio)
 
 
-def test_transform_to_physio_auto():
+def test_generate_physio_auto():
     create_random_bids_structure("physutils/tests/data", recording_id="cardiac")
     bids_parameters = {
         "subject": "01",
@@ -63,7 +63,7 @@ def test_transform_to_physio_auto():
         "recording": "cardiac",
     }
     bids_dir = os.path.abspath("physutils/tests/data/bids-dir")
-    task = tasks.transform_to_physio(
+    task = tasks.generate_physio(
         input_file=bids_dir,
         mode="auto",
         bids_parameters=bids_parameters,
@@ -82,9 +82,9 @@ def test_transform_to_physio_auto():
     assert isinstance(physio_obj, physio.Physio)
 
 
-def test_transform_to_physio_auto_error(caplog):
+def test_generate_physio_auto_error(caplog):
     bids_dir = os.path.abspath("physutils/tests/data/non-bids-dir")
-    task = tasks.transform_to_physio(
+    task = tasks.generate_physio(
         input_file=bids_dir,
         mode="auto",
         bids_channel="cardiac",
