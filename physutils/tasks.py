@@ -11,7 +11,6 @@ from .utils import is_bids_directory
 
 # from loguru import logger
 
-
 try:
     from pydra import task
 except ImportError:
