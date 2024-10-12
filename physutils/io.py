@@ -9,7 +9,6 @@ import os
 import os.path as op
 
 import numpy as np
-from bids import BIDSLayout
 from loguru import logger
 
 from physutils import physio
@@ -28,7 +27,7 @@ def load_from_bids(
     suffix="physio",
 ):
     """
-    Load physiological data from BIDS-formatted directory
+    Load physiological data from BIDS-formatted directory.
 
     Parameters
     ----------
@@ -50,6 +49,12 @@ def load_from_bids(
     data : :class:`physutils.Physio`
         Loaded physiological data
     """
+    try:
+        from bids import BIDSLayout
+    except ImportError:
+        raise ImportError(
+            "To use BIDS-based feature, pybids must be installed. Install manually or with `pip install physutils[bids]`"
+        )
 
     # check if file exists and is in BIDS format
     if not op.exists(bids_path):
