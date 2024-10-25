@@ -38,14 +38,14 @@ def test_generate_physio_bids_file():
         input_file=bids_dir,
         mode="bids",
         bids_parameters=bids_parameters,
-        bids_channel="cardiac",
+        col_physio_type="cardiac",
     )
 
     assert task.inputs.input_file == bids_dir
     assert task.inputs.mode == "bids"
     assert task.inputs.fs is None
     assert task.inputs.bids_parameters == bids_parameters
-    assert task.inputs.bids_channel == "cardiac"
+    assert task.inputs.col_physio_type == "cardiac"
 
     task()
 
@@ -67,14 +67,14 @@ def test_generate_physio_auto():
         input_file=bids_dir,
         mode="auto",
         bids_parameters=bids_parameters,
-        bids_channel="cardiac",
+        col_physio_type="cardiac",
     )
 
     assert task.inputs.input_file == bids_dir
     assert task.inputs.mode == "auto"
     assert task.inputs.fs is None
     assert task.inputs.bids_parameters == bids_parameters
-    assert task.inputs.bids_channel == "cardiac"
+    assert task.inputs.col_physio_type == "cardiac"
 
     task()
 
@@ -87,13 +87,13 @@ def test_generate_physio_auto_error(caplog):
     task = tasks.generate_physio(
         input_file=bids_dir,
         mode="auto",
-        bids_channel="cardiac",
+        col_physio_type="cardiac",
     )
 
     assert task.inputs.input_file == bids_dir
     assert task.inputs.mode == "auto"
     assert task.inputs.fs is None
-    assert task.inputs.bids_channel == "cardiac"
+    assert task.inputs.col_physio_type == "cardiac"
 
     try:
         task()

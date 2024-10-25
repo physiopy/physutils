@@ -12,7 +12,7 @@ from .utils import is_bids_directory
 # from loguru import logger
 
 try:
-    from pydra import task
+    from pydra.mark import task
 except ImportError:
     from .utils import task
 
