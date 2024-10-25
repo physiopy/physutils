@@ -1,3 +1,25 @@
+# 0.3.0 (Fri Oct 25 2024)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, Marie-Eve Picard ([@me-pic](https://github.com/me-pic)), for all your work!
+
+#### 🚀 Enhancement
+
+- Add BIDS reading support and prepare input loading for pydra workflow [#7](https://github.com/physiopy/physutils/pull/7) ([@maestroque](https://github.com/maestroque) [@smoia](https://github.com/smoia) [@me-pic](https://github.com/me-pic))
+
+#### 🐛 Bug Fix
+
+- Migrate Physio class from peakdet [#2](https://github.com/physiopy/physutils/pull/2) ([@maestroque](https://github.com/maestroque))
+
+#### Authors: 3
+
+- George Kikas ([@maestroque](https://github.com/maestroque))
+- Marie-Eve Picard ([@me-pic](https://github.com/me-pic))
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.2.1 (Sun Aug 25 2024)
 
 #### 🐛 Bug Fix
