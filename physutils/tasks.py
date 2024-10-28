@@ -54,7 +54,7 @@ def generate_physio(
                 "Could not determine input mode automatically. Please specify it manually."
             )
     if mode == "physio":
-        physio_obj = load_physio(input_file, fs=fs, allow_pickle=True)
+        physio_obj = load_physio(input_file, allow_pickle=True)
 
     elif mode == "bids":
         if bids_parameters is {}:
