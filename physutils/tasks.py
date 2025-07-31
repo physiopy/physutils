@@ -5,7 +5,7 @@
 
 import logging
 
-from .io import load_from_bids, load_physio
+from .io import load_from_bids, load_physio, load_misc
 from .physio import Physio
 from .utils import is_bids_directory
 
@@ -45,16 +45,18 @@ def generate_physio(
     LGR.info(f"Loading physio object from {input_file}")
 
     if mode == "auto":
-        if input_file.endswith((".phys", ".physio", ".1D", ".txt", ".tsv", ".csv")):
+        if input_file.endswith((".phys")):
             mode = "physio"
         elif is_bids_directory(input_file):
             mode = "bids"
+        elif input_file.endswith((".txt", ".tsv", ".csv")):
+            mode = "misc"
         else:
             raise ValueError(
                 "Could not determine input mode automatically. Please specify it manually."
             )
     if mode == "physio":
-        physio_obj = load_physio(input_file, fs=fs, allow_pickle=True)
+        physio_obj = load_physio(input_file, allow_pickle=True)
 
     elif mode == "bids":
         if bids_parameters is {}:
@@ -64,6 +66,8 @@ def generate_physio(
             physio_obj = (
                 physio_array[col_physio_type] if col_physio_type else physio_array
             )
+    elif mode == "misc":
+        physio_obj = load_misc(input_file, fs=fs)
     else:
         raise ValueError(f"Invalid generate_physio mode: {mode}")
 

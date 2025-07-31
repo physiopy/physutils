@@ -87,6 +87,12 @@ def test_load_from_bids_no_rec():
         assert phys_array[col].history[0][0] == "physutils.io.load_from_bids"
 
 
+def test_load_misc():
+    csv = io.load_physio(get_test_data_path("ECG.csv"))
+    assert isinstance(csv, physio.Physio)
+    assert np.isnan(csv.fs)
+
+
 def test_save_physio(tmpdir):
     pckl = io.load_physio(get_test_data_path("ECG.phys"), allow_pickle=True)
     out = io.save_physio(tmpdir.join("tmp").purebasename, pckl)

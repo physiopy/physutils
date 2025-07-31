@@ -224,6 +224,52 @@ def load_physio(data, *, fs=None, dtype=None, history=None, allow_pickle=False):
     return phys
 
 
+def load_misc(data, *, fs=None):
+    """
+    Returns `Physio` object with provided data
+
+    Parameters
+    ----------
+    data : str, os.path.PathLike or array_like
+        Input physiological data. If array_like, should be one-dimensional
+    fs : float, optional
+        Sampling rate of `data`. Default: None
+
+    Returns
+    -------
+    phys: :class:`physutils.Physio`
+        Loaded physiological data
+
+    Raises
+    ------
+    TypeError
+        If provided `data` is unable to be loaded
+    """
+    # load data
+    if isinstance(data, str) or isinstance(data, os.PathLike):
+        if os.path.exists(data):
+            ext = os.path.splitext(data)[-1]
+
+            if ext == '.gz':
+                ext == os.path.splitext(os.path.splitext(data)[0])[-1]
+
+            if ext == '.tsv':
+                data = np.genfromtxt(data, delimiter='\t')
+            elif ext == '.csv':
+                data = np.genfromtxt(data, delimiter=',')
+            else:
+                data = np.genfromtxt(data)
+        else:
+            raise IOError(f'Cannot find {data}')
+    else:
+        raise TypeError(f'{type(data)} is not a supported type')
+
+    # instantiate physio object
+    phys = physio.Physio(data, fs=fs)
+
+    return phys
+
+
 def save_physio(fname, data):
     """
     Saves `data` to `fname`
